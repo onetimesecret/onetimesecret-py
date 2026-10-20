@@ -1,0 +1,22 @@
+version: 2
+
+updates:
+  # The release workflow pins its actions to commit SHAs, so that a moved
+  # upstream tag cannot replace code able to publish the package. Dependabot
+  # keeps those pins current, updating the SHA and the version comment together.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: uv
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+      - python
+    groups:
+      dev-deps:
+        dependency-type: development
