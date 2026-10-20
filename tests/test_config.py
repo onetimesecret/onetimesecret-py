@@ -62,15 +62,35 @@ def test_blank_credentials_count_as_absent() -> None:
     assert ClientConfig.create(base_url=BASE_URL, customer="  ", api_token="").anonymous
 
 
-@pytest.mark.parametrize("bad", ["acct-123", "delano@example.com", "ur", "ur-1", "1234"])
+@pytest.mark.parametrize(
+    "bad",
+    [
+        "018f3c9e-7b1a-4c2d-9f8e-2a1b3c4d5e6f",  # record UUID
+        "018f3c9e7b1a4c2d9f8e2a1b3c4d5e6f",
+        "on1abc23def",  # an extid, but not the customer's
+        "user@example.com",  # the 0.5.x custid; also rejected by onetime-ruby
+        "cust_123",
+        "1abc23def",
+        "ur",
+        "ur-1",
+    ],
+)
 def test_customer_must_look_like_an_extid(bad: str) -> None:
-    with pytest.raises(ConfigurationError, match="not a customer extid"):
+    with pytest.raises(ConfigurationError, match="not a customer extid") as info:
         ClientConfig.create(base_url=BASE_URL, customer=bad, api_token=TOKEN)
+    # The message must say where to find the extid.
+    assert "user menu" in str(info.value)
 
 
-def test_extid_is_case_insensitive() -> None:
-    cfg = ClientConfig.create(base_url=BASE_URL, customer="UR1ABC23DEF", api_token=TOKEN)
-    assert cfg.customer == "UR1ABC23DEF"
+@pytest.mark.parametrize("extid", ["ur1abc23def", "UR1ABC23DEF", "urabcdef"])
+def test_accepts_customer_extids(extid: str) -> None:
+    cfg = ClientConfig.create(base_url=BASE_URL, customer=extid, api_token=TOKEN)
+    assert cfg.customer == extid
+
+
+def test_surrounding_whitespace_is_stripped() -> None:
+    cfg = ClientConfig.create(base_url=BASE_URL, customer=" ur1abc ", api_token=" tok ")
+    assert (cfg.customer, cfg.api_token) == ("ur1abc", "tok")
 
 
 @pytest.mark.parametrize(

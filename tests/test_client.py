@@ -95,6 +95,17 @@ def test_generic_request_helper(api: respx.MockRouter, client: Client) -> None:
     assert json.loads(req.content) == {"a": 1}
 
 
+def test_raise_on_error_false_returns_the_error_response(
+    api: respx.MockRouter, client: Client
+) -> None:
+    api.get("/secret/nope/status").respond(
+        404, json={"error": "gone", "error_type": "RecordNotFound"}
+    )
+    res = client.request("GET", "/secret/nope/status", raise_on_error=False)
+    assert res.status_code == 404
+    assert res["error_type"] == "RecordNotFound"
+
+
 def test_injected_http_client_is_used_and_closed() -> None:
     transport = httpx.MockTransport(lambda req: httpx.Response(200, json={"status": "ok"}))
     http = httpx.Client(transport=transport)

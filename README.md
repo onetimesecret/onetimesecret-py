@@ -164,6 +164,8 @@ guest.secrets.conceal("no account needed", guest=True)
 
 `client.request(method, path, json=..., params=...)` issues a request against
 any path under `/api/v2` and applies the same auth, retry and error handling.
+Pass `raise_on_error=False` to get an error status back as a `Response`
+instead of an exception.
 
 ## Responses
 
@@ -240,7 +242,7 @@ uv run ruff check .     # lint
 uv run ruff format .    # format
 uv run mypy             # type-check
 
-ONETIME_LIVE=1 ONETIME_BASE_URL=https://eu.onetimesecret.com uv run pytest -m live
+ONETIME_LIVE=1 uv run pytest -m live   # ONETIME_BASE_URL overrides the default host
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). Maintainers: see

@@ -109,15 +109,19 @@ class Client(BaseClient):
         *,
         json: Mapping[str, Any] | None = None,
         params: Mapping[str, Any] | None = None,
+        raise_on_error: bool = True,
     ) -> Response:
         """Issue a request against an arbitrary path under ``/api/v2``.
 
         Useful for endpoints this library does not wrap yet. ``path`` is
-        relative to the version prefix, e.g. ``"/secret/conceal"``.
+        relative to the version prefix, e.g. ``"/secret/conceal"``. With
+        ``raise_on_error=False`` an error status is returned as a
+        :class:`Response` instead of raising; retries still apply.
         """
-        return self._send(RequestSpec(method.upper(), path, json=json, params=params))
+        spec = RequestSpec(method.upper(), path, json=json, params=params)
+        return self._send(spec, raise_on_error=raise_on_error)
 
-    def _send(self, spec: RequestSpec) -> Response:
+    def _send(self, spec: RequestSpec, *, raise_on_error: bool = True) -> Response:
         attempt = 0
         while True:
             try:
@@ -132,7 +136,7 @@ class Client(BaseClient):
                 attempt += 1
                 time.sleep(self._backoff(attempt, raw))
                 continue
-            return self._process(raw)
+            return self._process(raw, raise_on_error=raise_on_error)
 
     # --- Lifecycle -------------------------------------------------------
 
@@ -217,11 +221,16 @@ class AsyncClient(BaseClient):
         *,
         json: Mapping[str, Any] | None = None,
         params: Mapping[str, Any] | None = None,
+        raise_on_error: bool = True,
     ) -> Response:
-        """Issue a request against an arbitrary path under ``/api/v2``."""
-        return await self._send(RequestSpec(method.upper(), path, json=json, params=params))
+        """Issue a request against an arbitrary path under ``/api/v2``.
 
-    async def _send(self, spec: RequestSpec) -> Response:
+        See :meth:`Client.request`.
+        """
+        spec = RequestSpec(method.upper(), path, json=json, params=params)
+        return await self._send(spec, raise_on_error=raise_on_error)
+
+    async def _send(self, spec: RequestSpec, *, raise_on_error: bool = True) -> Response:
         attempt = 0
         while True:
             try:
@@ -236,7 +245,7 @@ class AsyncClient(BaseClient):
                 attempt += 1
                 await anyio.sleep(self._backoff(attempt, raw))
                 continue
-            return self._process(raw)
+            return self._process(raw, raise_on_error=raise_on_error)
 
     # --- Lifecycle -------------------------------------------------------
 

@@ -98,10 +98,10 @@ class BaseClient:
 
     # --- Response handling ----------------------------------------------
 
-    def _process(self, raw: httpx.Response) -> Response:
+    def _process(self, raw: httpx.Response, *, raise_on_error: bool = True) -> Response:
         data = _parse_body(raw)
         log.debug("%s %s -> %s", raw.request.method, raw.request.url, raw.status_code)
-        if raw.status_code >= 400:
+        if raise_on_error and raw.status_code >= 400:
             raise error_from_response(raw, data)
         return Response(raw, data)
 

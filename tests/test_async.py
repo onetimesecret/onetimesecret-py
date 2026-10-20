@@ -68,6 +68,13 @@ async def test_errors_are_mapped(api: respx.MockRouter, async_client: AsyncClien
             await client.secrets.status("nope")
 
 
+async def test_raise_on_error_false(api: respx.MockRouter, async_client: AsyncClient) -> None:
+    api.get("/status").respond(500, json={"error": "boom"})
+    async with async_client as client:
+        res = await client.request("GET", "/status", raise_on_error=False)
+    assert res.status_code == 500
+
+
 async def test_get_is_retried(api: respx.MockRouter) -> None:
     route = api.get("/status")
     route.side_effect = [

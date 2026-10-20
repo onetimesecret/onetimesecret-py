@@ -43,6 +43,13 @@ def test_get_gives_up_after_max_retries(api: respx.MockRouter, retrying: Client)
     assert route.call_count == 3  # 1 + max_retries
 
 
+def test_raise_on_error_false_still_retries(api: respx.MockRouter, retrying: Client) -> None:
+    route = api.get("/status").respond(503, json={"error": "busy"})
+    res = retrying.request("GET", "/status", raise_on_error=False)
+    assert res.status_code == 503
+    assert route.call_count == 3
+
+
 def test_get_is_retried_on_connection_errors(api: respx.MockRouter, retrying: Client) -> None:
     route = api.get("/status")
     route.side_effect = [httpx.ConnectError("x"), httpx.Response(200, json={"status": "ok"})]
