@@ -20,7 +20,13 @@ _SECRET_URL_PATTERN = re.compile(r"/secret/([A-Za-z0-9]+)")
 
 
 def extract_secret_key(key: str) -> str:
-    """Return the bare identifier from either a key or a full secret URL."""
+    """Return the bare identifier from either a key or a full secret URL.
+
+    Only ``/secret/<key>`` URLs are recognised. A receipt URL
+    (``/receipt/<key>``) is not a secret URL and is returned unchanged apart
+    from surrounding whitespace; the receipt key opens the receipt, not the
+    secret.
+    """
     match = _SECRET_URL_PATTERN.search(key)
     return match.group(1) if match else key.strip()
 

@@ -119,10 +119,16 @@ def test_reveal_accepts_full_urls(api: respx.MockRouter, client: Client, key: st
 
 def test_extract_secret_key() -> None:
     assert extract_secret_key("abc") == "abc"
+    assert extract_secret_key("  abc ") == "abc"
     assert extract_secret_key("https://x.example/secret/abc123") == "abc123"
-    assert extract_secret_key("https://x.example/receipt/abc123") == (
-        "https://x.example/receipt/abc123"
-    )
+
+
+def test_extract_secret_key_leaves_receipt_urls_unchanged() -> None:
+    # A receipt URL is not a secret URL. The receipt key would open the
+    # receipt, not the secret, so it is passed through rather than guessed.
+    url = "https://x.example/receipt/abc123"
+    assert extract_secret_key(url) == url
+    assert extract_secret_key(f"  {url} ") == url
 
 
 def test_reveal_guest_path(api: respx.MockRouter, guest: Client) -> None:

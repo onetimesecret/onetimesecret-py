@@ -86,6 +86,17 @@ def test_empty_body(api: respx.MockRouter, client: Client) -> None:
     assert client.status().data is None
 
 
+def test_text_success_body_is_kept_as_text(api: respx.MockRouter, client: Client) -> None:
+    # A proxy may answer 200 with a non-JSON body; the text is kept on `.data`.
+    api.get("/status").respond(200, text="<html>ok</html>", headers={"x-request-id": "r"})
+    res = client.status()
+    assert res.status_code == 200
+    assert res.data == "<html>ok</html>"
+    assert res.request_id == "r"
+    assert len(res) == 0
+    assert dict(res) == {}
+
+
 def test_generic_request_helper(api: respx.MockRouter, client: Client) -> None:
     route = api.post("/some/new/endpoint").respond(200, json={"ok": True})
     res = client.request("post", "/some/new/endpoint", json={"a": 1}, params={"q": "x"})
@@ -127,3 +138,12 @@ def test_timeout_is_applied() -> None:
     c = Client(base_url=BASE_URL, timeout=5)
     assert c._http.timeout == httpx.Timeout(5)
     c.close()
+
+
+def test_injected_http_client_keeps_its_own_timeout() -> None:
+    # The SDK `timeout` configures the client it creates; a preconfigured
+    # `http_client` is used as given, so its timeout wins.
+    http = httpx.Client(timeout=1)
+    with Client(base_url=BASE_URL, timeout=5, http_client=http) as c:
+        assert c.config.timeout == 5
+        assert c._http.timeout == httpx.Timeout(1)
