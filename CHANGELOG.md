@@ -24,3 +24,4 @@ adheres to [Semantic Versioning](https://semver.org/).
   configured from the same environment variables.
 
 [Unreleased]: https://github.com/onetimesecret/onetimesecret-py/commits/main
+[0.1.0]: https://github.com/onetimesecret/onetimesecret-py/releases/tag/v0.1.0
