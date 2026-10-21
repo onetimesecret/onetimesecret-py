@@ -2,7 +2,7 @@
 
 How this SDK is set up for publishing and how a release is cut. The workflow
 is the same shape across the Onetime Secret SDKs and tooling (`rots`,
-`onetime-ruby`): push a `vX.Y.Z` tag, CI verifies the tag matches the package
+`onetimesecret-ruby`): push a `vX.Y.Z` tag, CI verifies the tag matches the package
 version, builds, publishes through the registry's trusted-publishing (OIDC)
 flow, and creates the GitHub Release. No registry token is stored anywhere.
 
@@ -18,7 +18,7 @@ flow, and creates the GitHub Release. No registry token is stored anywhere.
 | GitHub environment | `pypi` |
 
 Repository, distribution and import names do not need to match; the Ruby SDK
-follows the same pattern (`onetime-ruby` / `onetimesecret` / `Onetime`).
+follows the same pattern (`onetimesecret-ruby` / `onetimesecret` / `Onetime`).
 
 `onetimesecret` on PyPI is held by an unrelated third-party package. If it is
 ever transferred to the project under

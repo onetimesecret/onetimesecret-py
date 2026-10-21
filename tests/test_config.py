@@ -68,7 +68,7 @@ def test_blank_credentials_count_as_absent() -> None:
         "018f3c9e-7b1a-4c2d-9f8e-2a1b3c4d5e6f",  # record UUID
         "018f3c9e7b1a4c2d9f8e2a1b3c4d5e6f",
         "on1abc23def",  # an extid, but not the customer's
-        "user@example.com",  # the 0.5.x custid; also rejected by onetime-ruby
+        "user@example.com",  # the 0.5.x custid; also rejected by onetimesecret-ruby
         "cust_123",
         "1abc23def",
         "ur",
