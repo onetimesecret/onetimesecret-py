@@ -59,6 +59,32 @@ async def test_receipts_and_meta(api: respx.MockRouter, async_client: AsyncClien
         assert (await client.request("POST", "/x"))["ok"] is True
 
 
+async def test_generate_claims_the_value(api: respx.MockRouter, async_client: AsyncClient) -> None:
+    api.post("/secret/generate").respond(
+        200, json={"record": {"receipt": {"identifier": "r1"}}, "details": {"kind": "generate"}}
+    )
+    receipt = api.get("/receipt/r1").respond(
+        200, json={"record": {}, "details": {"secret_value": "gen-value"}}
+    )
+    async with async_client as client:
+        res = await client.secrets.generate(ttl=60)
+        skipped = await client.secrets.generate(claim_value=False)
+    assert res["details"] == {"kind": "generate", "secret_value": "gen-value"}
+    assert "secret_value" not in skipped["details"]
+    assert receipt.call_count == 1
+
+
+async def test_generate_claim_failure_does_not_raise(
+    api: respx.MockRouter, async_client: AsyncClient
+) -> None:
+    api.post("/secret/generate").respond(200, json={"record": {"receipt": {"identifier": "r1"}}})
+    api.get("/receipt/r1").respond(500, json={"error": "boom"})
+    async with async_client as client:
+        res = await client.secrets.generate()
+    assert isinstance(res["details"]["claim_error"], ServerError)
+    assert res["record"]["receipt"]["identifier"] == "r1"
+
+
 async def test_errors_are_mapped(api: respx.MockRouter, async_client: AsyncClient) -> None:
     api.get("/secret/nope/status").respond(
         404, json={"error": "gone", "error_type": "RecordNotFound"}

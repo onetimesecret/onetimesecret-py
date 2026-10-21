@@ -5,7 +5,7 @@ import json
 import pytest
 import respx
 
-from onetimesecret import Client
+from onetimesecret import Client, ServerError
 from onetimesecret.resources import extract_secret_key
 
 CONCEAL_RESPONSE = {
@@ -66,24 +66,103 @@ def test_conceal_guest_uses_guest_path(api: respx.MockRouter, guest: Client) -> 
     assert route.called
 
 
+GENERATE_RESPONSE = {**CONCEAL_RESPONSE, "details": {"kind": "generate"}}
+
+# The first read of a generated secret's receipt discloses the value under
+# `details`; later reads return null there.
+RECEIPT_WITH_VALUE = {
+    "record": {"identifier": "rcpt123", "state": "new"},
+    "details": {"secret_value": "UEy}8cWR]FmJ", "show_secret": True, "can_decrypt": True},
+}
+
+
 def test_generate(api: respx.MockRouter, client: Client) -> None:
-    route = api.post("/secret/generate").respond(200, json=CONCEAL_RESPONSE)
-    client.secrets.generate(ttl=60, passphrase="pw")
+    route = api.post("/secret/generate").respond(200, json=GENERATE_RESPONSE)
+    client.secrets.generate(ttl=60, passphrase="pw", claim_value=False)
     assert body(route) == {"secret": {"ttl": 60, "passphrase": "pw"}}
 
 
 def test_generate_with_no_options_sends_empty_secret_object(
     api: respx.MockRouter, client: Client
 ) -> None:
-    route = api.post("/secret/generate").respond(200, json=CONCEAL_RESPONSE)
-    client.secrets.generate()
+    route = api.post("/secret/generate").respond(200, json=GENERATE_RESPONSE)
+    client.secrets.generate(claim_value=False)
     assert body(route) == {"secret": {}}
 
 
 def test_generate_guest_path(api: respx.MockRouter, guest: Client) -> None:
-    route = api.post("/guest/secret/generate").respond(200, json=CONCEAL_RESPONSE)
-    guest.secrets.generate(guest=True)
+    route = api.post("/guest/secret/generate").respond(200, json=GENERATE_RESPONSE)
+    guest.secrets.generate(guest=True, claim_value=False)
     assert route.called
+
+
+def test_generate_claims_the_value_from_the_receipt(api: respx.MockRouter, client: Client) -> None:
+    generate = api.post("/secret/generate").respond(200, json=GENERATE_RESPONSE)
+    receipt = api.get("/receipt/rcpt123").respond(200, json=RECEIPT_WITH_VALUE)
+    res = client.secrets.generate(ttl=60)
+    assert res["details"]["secret_value"] == "UEy}8cWR]FmJ"
+    assert res["details"]["kind"] == "generate"
+    assert "claim_error" not in res["details"]
+    assert res["record"]["secret"]["identifier"] == "sec456"
+    assert generate.call_count == 1
+    assert receipt.call_count == 1
+    assert len(api.calls) == 2
+
+
+def test_generate_claim_uses_guest_receipt_route(api: respx.MockRouter, guest: Client) -> None:
+    api.post("/guest/secret/generate").respond(200, json=GENERATE_RESPONSE)
+    receipt = api.get("/guest/receipt/rcpt123").respond(200, json=RECEIPT_WITH_VALUE)
+    res = guest.secrets.generate(guest=True)
+    assert res["details"]["secret_value"] == "UEy}8cWR]FmJ"
+    assert receipt.called
+
+
+def test_generate_claim_failure_does_not_raise(
+    api: respx.MockRouter, client: Client, caplog: pytest.LogCaptureFixture
+) -> None:
+    api.post("/secret/generate").respond(200, json=GENERATE_RESPONSE)
+    api.get("/receipt/rcpt123").respond(500, json={"error": "boom"})
+    with caplog.at_level("WARNING", logger="onetimesecret"):
+        res = client.secrets.generate()
+    assert res.status_code == 200
+    assert res["record"]["receipt"]["identifier"] == "rcpt123"
+    assert "secret_value" not in res["details"]
+    assert isinstance(res["details"]["claim_error"], ServerError)
+    assert res["details"]["kind"] == "generate"
+    assert "Could not claim" in caplog.text
+
+
+def test_generate_claim_value_false_makes_one_request(
+    api: respx.MockRouter, client: Client
+) -> None:
+    api.post("/secret/generate").respond(200, json=GENERATE_RESPONSE)
+    receipt = api.get("/receipt/rcpt123").respond(200, json=RECEIPT_WITH_VALUE)
+    res = client.secrets.generate(claim_value=False)
+    assert "secret_value" not in res["details"]
+    assert "claim_error" not in res["details"]
+    assert not receipt.called
+    assert len(api.calls) == 1
+
+
+def test_generate_claim_when_server_withholds_the_value(
+    api: respx.MockRouter, client: Client, caplog: pytest.LogCaptureFixture
+) -> None:
+    api.post("/secret/generate").respond(200, json=GENERATE_RESPONSE)
+    api.get("/receipt/rcpt123").respond(
+        200, json={"record": {}, "details": {"secret_value": None, "show_secret": True}}
+    )
+    with caplog.at_level("WARNING", logger="onetimesecret"):
+        res = client.secrets.generate()
+    assert "secret_value" not in res["details"]
+    assert "claim_error" not in res["details"]
+    assert "did not disclose" in caplog.text
+
+
+def test_generate_claim_without_receipt_identifier(api: respx.MockRouter, client: Client) -> None:
+    api.post("/secret/generate").respond(200, json={"record": {}})
+    res = client.secrets.generate()
+    assert isinstance(res["details"]["claim_error"], LookupError)
+    assert len(api.calls) == 1
 
 
 def test_reveal_sends_continue_and_passphrase(api: respx.MockRouter, client: Client) -> None:
