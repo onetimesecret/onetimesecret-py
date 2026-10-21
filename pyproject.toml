@@ -58,6 +58,7 @@ path = "src/onetimesecret/_version.py"
 include = [
   "src/onetimesecret",
   "tests",
+  "examples",
   "CHANGELOG.md",
   "LICENSE",
   "README.md",
