@@ -105,7 +105,8 @@ def test_guest_receipt_show_and_burn(live: Client) -> None:
     concealed = live.secrets.conceal(_unique_value("receipt"), ttl=TTL, guest=guest)
     receipt_key = concealed["record"]["receipt"]["identifier"]
     secret_key = concealed["record"]["secret"]["identifier"]
-    assert receipt_key and secret_key
+    assert receipt_key
+    assert secret_key
 
     shown = live.receipts.show(receipt_key, guest=guest)
     assert shown.status_code == 200
