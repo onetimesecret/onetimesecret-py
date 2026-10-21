@@ -7,7 +7,7 @@ import httpx
 import pytest
 import respx
 
-from onetimesecret import APIConnectionError, AsyncClient, NotFoundError, ServerError
+from onetimesecret import APIConnectionError, AsyncClient, ClaimError, NotFoundError, ServerError
 
 from .conftest import BASE_URL
 
@@ -81,7 +81,10 @@ async def test_generate_claim_failure_does_not_raise(
     api.get("/receipt/r1").respond(500, json={"error": "boom"})
     async with async_client as client:
         res = await client.secrets.generate()
-    assert isinstance(res["details"]["claim_error"], ServerError)
+    err = res["details"]["claim_error"]
+    assert isinstance(err, ClaimError)
+    assert (err.reason, err.status_code) == ("ServerError", 500)
+    assert "boom" not in str(err)
     assert res["record"]["receipt"]["identifier"] == "r1"
 
 

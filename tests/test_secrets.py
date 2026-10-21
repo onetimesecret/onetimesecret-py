@@ -5,7 +5,7 @@ import json
 import pytest
 import respx
 
-from onetimesecret import Client, ServerError
+from onetimesecret import ClaimError, Client
 from onetimesecret.resources import extract_secret_key
 
 CONCEAL_RESPONSE = {
@@ -127,9 +127,13 @@ def test_generate_claim_failure_does_not_raise(
     assert res.status_code == 200
     assert res["record"]["receipt"]["identifier"] == "rcpt123"
     assert "secret_value" not in res["details"]
-    assert isinstance(res["details"]["claim_error"], ServerError)
-    assert res["details"]["kind"] == "generate"
+    err = res["details"]["claim_error"]
+    assert isinstance(err, ClaimError)
+    assert err.reason == "ServerError"
+    assert err.status_code == 500
+    assert "boom" not in str(err)
     assert "Could not claim" in caplog.text
+    assert "boom" not in caplog.text
 
 
 def test_generate_claim_value_false_makes_one_request(
@@ -161,8 +165,47 @@ def test_generate_claim_when_server_withholds_the_value(
 def test_generate_claim_without_receipt_identifier(api: respx.MockRouter, client: Client) -> None:
     api.post("/secret/generate").respond(200, json={"record": {}})
     res = client.secrets.generate()
-    assert isinstance(res["details"]["claim_error"], LookupError)
+    assert isinstance(res["details"]["claim_error"], ClaimError)
+    assert res["details"]["claim_error"].status_code is None
     assert len(api.calls) == 1
+
+
+def test_generate_claim_malformed_200_receipt_body_leaks_nothing(
+    api: respx.MockRouter, client: Client, caplog: pytest.LogCaptureFixture
+) -> None:
+    # A 200 whose body is not JSON. It contains the value in the clear; the
+    # error, its repr and the log line must not carry any of it.
+    leaked = "UEy}8cWR]FmJ"
+    api.post("/secret/generate").respond(200, json=GENERATE_RESPONSE)
+    api.get("/receipt/rcpt123").respond(
+        200,
+        text=f'{{"details": {{"secret_value": "{leaked}"}}, "record": {{',
+        headers={"content-type": "application/json"},
+    )
+    with caplog.at_level("WARNING", logger="onetimesecret"):
+        res = client.secrets.generate()
+    assert res["record"]["receipt"]["identifier"] == "rcpt123"
+    assert "secret_value" not in res["details"]
+    err = res["details"]["claim_error"]
+    assert isinstance(err, ClaimError)
+    assert err.status_code == 200
+    assert leaked not in str(err)
+    assert leaked not in repr(err)
+    assert leaked not in repr(err.args)
+    assert leaked not in caplog.text
+
+
+def test_generate_claim_error_message_carries_status_and_type_only(
+    api: respx.MockRouter, client: Client
+) -> None:
+    api.post("/secret/generate").respond(200, json=GENERATE_RESPONSE)
+    api.get("/receipt/rcpt123").respond(
+        404, json={"error": "secret-ish message", "error_type": "RecordNotFound"}
+    )
+    err = client.secrets.generate()["details"]["claim_error"]
+    assert str(err) == "NotFoundError (status=404, type=RecordNotFound)"
+    assert not hasattr(err, "body")
+    assert not hasattr(err, "response")
 
 
 def test_reveal_sends_continue_and_passphrase(api: respx.MockRouter, client: Client) -> None:

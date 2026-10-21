@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any
 
-from .._exceptions import OnetimeSecretError
+from .._exceptions import ClaimError
 from . import _specs
 
 if TYPE_CHECKING:
@@ -26,13 +27,16 @@ def _receipt_key(data: Any) -> str | None:
     return key if isinstance(key, str) and key else None
 
 
-def _attach_claim(res: Response, receipt: Response | None, error: Exception | None) -> None:
+def _attach_claim(res: Response, receipt: Response | None, error: ClaimError | None) -> None:
     """Copy the disclosed value (or the failure) into ``res["details"]``.
 
     The generate response never carries the value; the server discloses it
     once, on the first read of the receipt, as ``details.secret_value``. We
     put it in the same slot of the generate response so callers read the one
-    envelope. Never log the value.
+    envelope.
+
+    Nothing here logs or stores a response body: the receipt body may hold
+    the value, and a malformed one would otherwise leak it through the error.
     """
     data = res.data
     if not isinstance(data, dict):
@@ -41,6 +45,9 @@ def _attach_claim(res: Response, receipt: Response | None, error: Exception | No
     details = data.get("details")
     if not isinstance(details, dict):
         details = data["details"] = {}
+    if error is None and receipt is not None and not isinstance(receipt.data, Mapping):
+        # A 200 whose body did not parse as a JSON object. Do not inspect it.
+        error = ClaimError("receipt body is not a JSON object", status_code=receipt.status_code)
     if error is not None:
         details["claim_error"] = error
         log.warning("Could not claim the generated secret value: %s", error)
@@ -119,7 +126,8 @@ class Secrets:
 
         If that read fails the secret still exists and its link is valid, so
         nothing is raised: the generate response is returned without the
-        value, the exception is attached at ``res["details"]["claim_error"]``
+        value, a :class:`~onetimesecret.ClaimError` (status and error type
+        only, never the body) is attached at ``res["details"]["claim_error"]``
         and a warning is logged. If the server simply declined to disclose
         the value, ``secret_value`` is absent and no error is attached.
 
@@ -151,12 +159,12 @@ class Secrets:
             return res
         key = _receipt_key(res.data)
         if key is None:
-            _attach_claim(res, None, LookupError("generate response has no receipt identifier"))
+            _attach_claim(res, None, ClaimError("generate response has no receipt identifier"))
             return res
         try:
             receipt = self._client._send(_specs.show_receipt(key, guest=guest))
-        except OnetimeSecretError as exc:
-            _attach_claim(res, None, exc)
+        except Exception as exc:  # the secret exists; never raise past this point
+            _attach_claim(res, None, ClaimError.from_exception(exc))
         else:
             _attach_claim(res, receipt, None)
         return res
@@ -243,12 +251,12 @@ class AsyncSecrets:
             return res
         key = _receipt_key(res.data)
         if key is None:
-            _attach_claim(res, None, LookupError("generate response has no receipt identifier"))
+            _attach_claim(res, None, ClaimError("generate response has no receipt identifier"))
             return res
         try:
             receipt = await self._client._send(_specs.show_receipt(key, guest=guest))
-        except OnetimeSecretError as exc:
-            _attach_claim(res, None, exc)
+        except Exception as exc:  # the secret exists; never raise past this point
+            _attach_claim(res, None, ClaimError.from_exception(exc))
         else:
             _attach_claim(res, receipt, None)
         return res

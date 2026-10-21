@@ -221,6 +221,7 @@ except APIError as e:
 | `ConflictError` | 409 |
 | `RateLimitError` | 429 / `LimitExceeded` (see `.retry_after`) |
 | `ServerError` | 5xx |
+| `ClaimError` | attached at `res["details"]["claim_error"]` by `generate()`, never raised; status and error type only |
 | `APIConnectionError` / `APITimeoutError` | network failures (`__cause__` is the `httpx` exception) |
 | `ConfigurationError` | bad `base_url`, malformed customer extid, incomplete credentials (raised at construction) |
 

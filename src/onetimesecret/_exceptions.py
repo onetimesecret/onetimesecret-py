@@ -128,6 +128,43 @@ class ServerError(APIError):
     """5xx / ``ServerError``."""
 
 
+class ClaimError(OnetimeSecretError):
+    """Reading the receipt to claim a generated secret value failed.
+
+    :meth:`onetimesecret.resources.Secrets.generate` attaches this at
+    ``res["details"]["claim_error"]`` instead of raising, because the secret
+    was already created and its link is valid.
+
+    It deliberately carries no response body, server message or parser
+    message: a malformed receipt body could contain the generated value.
+
+    Attributes:
+        reason: What failed, usually the underlying exception's class name.
+        status_code: HTTP status of the receipt response, if one was received.
+        error_type: The server's ``error_type``, if it sent one.
+    """
+
+    def __init__(
+        self, reason: str, *, status_code: int | None = None, error_type: str | None = None
+    ) -> None:
+        self.reason = reason
+        self.status_code = status_code
+        self.error_type = error_type
+        detail = []
+        if status_code is not None:
+            detail.append(f"status={status_code}")
+        if error_type:
+            detail.append(f"type={error_type}")
+        super().__init__(f"{reason} ({', '.join(detail)})" if detail else reason)
+
+    @classmethod
+    def from_exception(cls, exc: BaseException) -> ClaimError:
+        """Build a sanitized error from the exception that broke the claim."""
+        if isinstance(exc, APIError):
+            return cls(type(exc).__name__, status_code=exc.status_code, error_type=exc.error_type)
+        return cls(type(exc).__name__)
+
+
 # --- Mapping -------------------------------------------------------------
 
 _ERROR_TYPE_MAP: dict[str, type[APIError]] = {

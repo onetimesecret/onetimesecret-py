@@ -14,7 +14,8 @@ adheres to [Semantic Versioning](https://semver.org/).
   and `supported_locales`.
 - `secrets.generate()` claims the generated value, which the server discloses
   only on the first read of the receipt, and returns it at
-  `res["details"]["secret_value"]`. A failed claim is attached at
+  `res["details"]["secret_value"]`. A failed claim is attached as a
+  `ClaimError` (status and error type only, never the body) at
   `res["details"]["claim_error"]` instead of raising; `claim_value=False`
   skips the extra request.
 - Typed exception hierarchy following the ADR-013 error contract, with
