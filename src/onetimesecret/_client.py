@@ -47,8 +47,9 @@ class Client(BaseClient):
             (``ONETIME_CUSTOMER_EXTID``).
         api_token: Your API token (``ONETIME_API_TOKEN``).
         timeout: Per-request timeout in seconds (default 30).
-        max_retries: Retries for idempotent (GET) requests on connection errors
-            and 429/5xx responses (default 2). POST requests are never retried.
+        max_retries: Retries for idempotent (GET, HEAD) requests on connection
+            errors and 429/5xx responses (default 2). POST requests are never
+            retried.
         user_agent: Overrides the default ``User-Agent``.
         default_headers: Extra headers sent with every request.
         http_client: A preconfigured ``httpx.Client`` (proxies, custom TLS,

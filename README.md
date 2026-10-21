@@ -105,7 +105,7 @@ rejected with a helpful error. The hosts are also available as
 | `customer` | `$ONETIME_CUSTOMER_EXTID` | Customer extid (`ur…`) |
 | `api_token` | `$ONETIME_API_TOKEN` | API token |
 | `timeout` | `30` | Seconds, per request |
-| `max_retries` | `2` | Retries for idempotent (GET) requests only |
+| `max_retries` | `2` | Retries for idempotent (GET, HEAD) requests only |
 | `user_agent` | `onetime-secret-python/<version> …` | |
 | `default_headers` | `{}` | Sent with every request |
 | `http_client` | none | A preconfigured `httpx.Client` / `httpx.AsyncClient` |
@@ -120,7 +120,7 @@ manager). It is safe to share between threads.
 ### Retries
 
 Connection errors and `429`/`5xx` responses are retried with exponential
-backoff for idempotent requests (GET) only, up to `max_retries` times. A
+backoff for idempotent requests (GET, HEAD) only, up to `max_retries` times. A
 `Retry-After` header is honoured. POST requests are never retried: concealing
 twice creates two secrets, and revealing or burning is destructive.
 
