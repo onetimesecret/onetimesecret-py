@@ -82,6 +82,10 @@ def generate(
 def reveal(key: str, *, passphrase: str | None, guest: bool) -> RequestSpec:
     """Reveal (consume) a secret. This is a one-time, destructive action."""
     identifier = extract_secret_key(key)
+    # Spec drift: the v2 OpenAPI spec types `continue` as a string, but the
+    # server accepts a JSON boolean as well and that is what the other SDKs
+    # send. The server wins (see AGENTS.md); test_reveal_sends_continue_as_a_
+    # json_boolean pins this.
     body = _compact(passphrase=passphrase, **{"continue": True})
     return RequestSpec("POST", _guest(f"/secret/{identifier}/reveal", guest), json=body)
 
@@ -121,6 +125,8 @@ def recent_receipts() -> RequestSpec:
 
 def burn(key: str, *, passphrase: str | None, guest: bool) -> RequestSpec:
     """Burn (destroy) an unread secret by its receipt key."""
+    # Same spec drift as reveal(): the spec says string, the server takes a
+    # boolean; test_burn_sends_continue_as_a_json_boolean pins this.
     body = _compact(passphrase=passphrase, **{"continue": True})
     return RequestSpec("POST", _guest(f"/receipt/{key.strip()}/burn", guest), json=body)
 

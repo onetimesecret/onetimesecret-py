@@ -95,6 +95,17 @@ def test_reveal_sends_continue_and_passphrase(api: respx.MockRouter, client: Cli
     assert body(route) == {"passphrase": "pw", "continue": True}
 
 
+def test_reveal_sends_continue_as_a_json_boolean(api: respx.MockRouter, client: Client) -> None:
+    # The v2 OpenAPI spec types `continue` as a string; the server accepts a
+    # boolean too and that is what we send. `== True` would also pass for 1,
+    # so check the wire bytes and the decoded type explicitly.
+    route = api.post("/secret/sec456/reveal").respond(200, json={})
+    client.secrets.reveal("sec456")
+    raw = route.calls.last.request.content
+    assert b'"continue":true' in raw or b'"continue": true' in raw
+    assert body(route)["continue"] is True
+
+
 def test_reveal_without_passphrase(api: respx.MockRouter, client: Client) -> None:
     route = api.post("/secret/sec456/reveal").respond(200, json={"record": {}})
     client.secrets.reveal("sec456")

@@ -35,6 +35,13 @@ def test_burn(api: respx.MockRouter, client: Client) -> None:
     assert body(route) == {"passphrase": "pw", "continue": True}
 
 
+def test_burn_sends_continue_as_a_json_boolean(api: respx.MockRouter, client: Client) -> None:
+    # Spec says string, server accepts a boolean; see _specs.burn().
+    route = api.post("/receipt/rcpt123/burn").respond(200, json={})
+    client.receipts.burn("rcpt123")
+    assert body(route)["continue"] is True
+
+
 def test_burn_guest_path(api: respx.MockRouter, guest: Client) -> None:
     route = api.post("/guest/receipt/rcpt123/burn").respond(200, json={})
     guest.receipts.burn("rcpt123", guest=True)
