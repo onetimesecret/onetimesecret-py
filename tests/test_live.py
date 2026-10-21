@@ -8,7 +8,7 @@ so a default ``pytest`` run never touches the network.
 
 Configuration:
     ONETIME_LIVE            set to enable these tests
-    ONETIME_BASE_URL        target host (default: the Canadian production host)
+    ONETIME_BASE_URL        target host (default: https://eu.onetimesecret.com)
     ONETIME_CUSTOMER_EXTID  optional; with ONETIME_API_TOKEN, exercises the
     ONETIME_API_TOKEN       authenticated endpoints as well
 
@@ -29,7 +29,7 @@ from onetimesecret import APIError, AsyncClient, Client
 
 pytestmark = pytest.mark.live
 
-DEFAULT_BASE_URL = "https://ca.onetimesecret.com"
+DEFAULT_BASE_URL = "https://eu.onetimesecret.com"
 TTL = 60
 
 # Captured at import, before the unit-test fixture clears the variables.
