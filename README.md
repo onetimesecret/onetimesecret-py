@@ -41,8 +41,11 @@ res = client.secrets.conceal("hunter2", ttl=3600, passphrase="pw12")
 res["record"]["receipt"]["identifier"]  # the receipt (creator) key
 res["record"]["secret"]["identifier"]  # the secret (recipient) key
 
-# Generate a random secret server-side
-client.secrets.generate(ttl=86_400)
+# Generate a random secret server-side. The server discloses the value once,
+# on the first read of the receipt; generate() does that read for you.
+generated = client.secrets.generate(ttl=86_400)
+generated["details"]["secret_value"]  # the generated value
+generated["record"]["secret"]["identifier"]  # the secret (recipient) key
 
 # Reveal (consume) a secret, one-time only. Accepts a key or the full link.
 secret = client.secrets.reveal("abc123secretkey", passphrase="pw12")
@@ -141,7 +144,7 @@ guest.secrets.conceal("no account needed", guest=True)
 | Method | |
 |---|---|
 | `conceal(secret, *, ttl, passphrase, recipient, share_domain, display_type, guest)` | alias `share` |
-| `generate(*, ttl, passphrase, recipient, share_domain, guest)` | |
+| `generate(*, ttl, passphrase, recipient, share_domain, guest, claim_value)` | value at `res["details"]["secret_value"]` |
 | `reveal(key, *, passphrase, guest)` | key or full URL |
 | `show(key, *, guest)` | metadata without the value |
 | `status(key)` | |

@@ -12,6 +12,11 @@ adheres to [Semantic Versioning](https://semver.org/).
 - `secrets` (conceal, generate, reveal, show, status, status_list) and
   `receipts` (show, recent, burn, update) resources, plus `status`, `version`
   and `supported_locales`.
+- `secrets.generate()` claims the generated value, which the server discloses
+  only on the first read of the receipt, and returns it at
+  `res["details"]["secret_value"]`. A failed claim is attached at
+  `res["details"]["claim_error"]` instead of raising; `claim_value=False`
+  skips the extra request.
 - Typed exception hierarchy following the ADR-013 error contract, with
   `AccountRequiredError` for the "requires account" form error.
 - Retries with exponential backoff for idempotent requests; `Retry-After`
