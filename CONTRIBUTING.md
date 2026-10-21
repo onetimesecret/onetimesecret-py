@@ -56,6 +56,10 @@ authenticated endpoints.
 - Public API is typed and documented with Google-style docstrings; `mypy
   --strict` must pass.
 
+## Conduct
+
+This project follows the [Code of Conduct](CODE_OF_CONDUCT.md).
+
 ## Reporting security issues
 
 See [SECURITY.md](SECURITY.md). Please do not open public issues for
