@@ -20,5 +20,7 @@ adheres to [Semantic Versioning](https://semver.org/).
   to inspect error responses without an exception.
 - Environment fallbacks shared with the other SDKs: `ONETIME_BASE_URL`,
   `ONETIME_CUSTOMER_EXTID`, `ONETIME_API_TOKEN`.
+- `examples/basic.py`, an end-to-end conceal / receipt / reveal walkthrough
+  configured from the same environment variables.
 
 [Unreleased]: https://github.com/onetimesecret/onetimesecret-py/commits/main

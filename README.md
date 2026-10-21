@@ -233,6 +233,22 @@ never the problem.
 The library logs one `DEBUG` line per request to the `onetimesecret` logger.
 Secret values and credentials are never logged.
 
+## Example
+
+[`examples/basic.py`](examples/basic.py) round-trips a secret against a real
+server: conceal, read the receipt, reveal, and read the receipt again to see
+the state change from `new` to `revealed`. It reads `ONETIME_BASE_URL` and,
+optionally, `ONETIME_CUSTOMER_EXTID` / `ONETIME_API_TOKEN` from the
+environment, and runs anonymously through the guest endpoints when no
+credentials are set:
+
+```sh
+ONETIME_BASE_URL=https://eu.onetimesecret.com uv run examples/basic.py
+```
+
+Point `ONETIME_BASE_URL` at your own deployment to run it against a
+self-hosted server.
+
 ## Development
 
 ```sh
@@ -242,7 +258,7 @@ uv run ruff check .     # lint
 uv run ruff format .    # format
 uv run mypy             # type-check
 
-ONETIME_LIVE=1 uv run pytest -m live   # ONETIME_BASE_URL overrides the default host
+ONETIME_LIVE=1 uv run pytest -m live   # ONETIME_BASE_URL overrides the default (EU) host
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). Maintainers: see

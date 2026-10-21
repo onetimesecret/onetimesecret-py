@@ -25,6 +25,8 @@ uv run ruff check . && uv run ruff format --check . && uv run mypy
   per operation returning a `RequestSpec`. Change paths and payloads here only.
 - `src/onetimesecret/resources/{secrets,receipts}.py`: sync and async
   dispatchers over `_specs`.
+- `examples/basic.py`: end-to-end walkthrough against a real server; linted
+  and type-checked with the package.
 
 ## Rules
 
