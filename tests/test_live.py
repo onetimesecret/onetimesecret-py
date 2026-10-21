@@ -98,6 +98,11 @@ def test_guest_generate_returns_receipt_and_secret(live: Client) -> None:
     assert res.status_code == 200
     assert res["record"]["receipt"]
     assert res["record"]["secret"]
+    # The value is disclosed once, on the first receipt read, which generate()
+    # performs on our behalf.
+    assert "claim_error" not in res["details"]
+    assert isinstance(res["details"]["secret_value"], str)
+    assert res["details"]["secret_value"]
 
 
 def test_guest_receipt_show_and_burn(live: Client) -> None:
