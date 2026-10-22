@@ -40,6 +40,10 @@ ONETIME_LIVE=1 ONETIME_BASE_URL=https://eu.onetimesecret.com uv run pytest -m li
 Set `ONETIME_CUSTOMER_EXTID` and `ONETIME_API_TOKEN` as well to exercise the
 authenticated endpoints.
 
+Against a local server, start it with `HOST` set to the host and port in
+`ONETIME_BASE_URL` (for example `HOST=127.0.0.1:7143`): the server builds the
+links in receipts from `HOST`, which defaults to `localhost:3000`.
+
 ## Guidelines
 
 - Keep the wire contract in `src/onetimesecret/resources/_specs.py`. The sync
