@@ -116,6 +116,9 @@ def test_guest_receipt_show_and_burn(live: Client) -> None:
     shown = live.receipts.show(receipt_key, guest=guest)
     assert shown.status_code == 200
     assert shown["record"]["identifier"] == receipt_key
+    # The server builds receipt links from its HOST setting; a local server
+    # whose HOST differs from ONETIME_BASE_URL fails here.
+    assert shown["record"]["share_url"] == f"{live.base_url}/secret/{secret_key}"
 
     # The burn response's `record` is the receipt as dumped; `success` and
     # `details.title` are the reliable signals. The secret must be gone after.
