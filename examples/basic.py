@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import sys
 
-from onetimesecret import Client, OnetimeSecretError
+from onetimesecret_v2 import Client, OnetimeSecretError
 
 
 def main() -> int:

@@ -4,7 +4,7 @@ import httpx
 import pytest
 import respx
 
-from onetimesecret import (
+from onetimesecret_v2 import (
     AccountRequiredError,
     APIConnectionError,
     APIError,

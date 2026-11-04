@@ -518,7 +518,7 @@ wheels = [
 ]
 
 [[package]]
-name = "onetime-secret"
+name = "onetimesecret-v2"
 source = { editable = "." }
 dependencies = [
     { name = "anyio" },

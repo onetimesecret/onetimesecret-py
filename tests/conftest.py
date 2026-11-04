@@ -6,7 +6,7 @@ from collections.abc import Iterator
 import pytest
 import respx
 
-from onetimesecret import AsyncClient, Client
+from onetimesecret_v2 import AsyncClient, Client
 
 BASE_URL = "https://ca.onetimesecret.com"
 API = f"{BASE_URL}/api/v2"

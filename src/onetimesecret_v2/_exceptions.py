@@ -131,7 +131,7 @@ class ServerError(APIError):
 class ClaimError(OnetimeSecretError):
     """Reading the receipt to claim a generated secret value failed.
 
-    :meth:`onetimesecret.resources.Secrets.generate` attaches this at
+    :meth:`onetimesecret_v2.resources.Secrets.generate` attaches this at
     ``res["details"]["claim_error"]`` instead of raising, because the secret
     was already created and its link is valid.
 

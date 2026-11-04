@@ -4,7 +4,7 @@ import json
 
 import respx
 
-from onetimesecret import Client
+from onetimesecret_v2 import Client
 
 
 def body(route: respx.Route) -> dict[str, object]:

@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 
     from ._config import ClientConfig
 
-log = logging.getLogger("onetimesecret")
+log = logging.getLogger("onetimesecret_v2")
 
 RETRYABLE_STATUSES = frozenset({429, 500, 502, 503, 504})
 # Only idempotent requests are retried. POST is never retried: concealing
@@ -147,7 +147,7 @@ class BaseClient:
 def default_user_agent() -> str:
     """The default ``User-Agent`` header value."""
     return (
-        f"onetime-secret-python/{__version__} "
+        f"onetimesecret-v2-python/{__version__} "
         f"python/{platform.python_version()} httpx/{httpx.__version__}"
     )
 

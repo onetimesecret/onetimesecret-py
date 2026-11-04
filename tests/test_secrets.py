@@ -5,8 +5,8 @@ import json
 import pytest
 import respx
 
-from onetimesecret import ClaimError, Client
-from onetimesecret.resources import extract_secret_key
+from onetimesecret_v2 import ClaimError, Client
+from onetimesecret_v2.resources import extract_secret_key
 
 CONCEAL_RESPONSE = {
     "success": True,
@@ -54,7 +54,7 @@ def test_conceal_omits_unset_fields(api: respx.MockRouter, client: Client) -> No
 
 
 def test_share_is_an_alias_for_conceal() -> None:
-    from onetimesecret.resources import AsyncSecrets, Secrets
+    from onetimesecret_v2.resources import AsyncSecrets, Secrets
 
     assert Secrets.share is Secrets.conceal
     assert AsyncSecrets.share is AsyncSecrets.conceal
@@ -122,7 +122,7 @@ def test_generate_claim_failure_does_not_raise(
 ) -> None:
     api.post("/secret/generate").respond(200, json=GENERATE_RESPONSE)
     api.get("/receipt/rcpt123").respond(500, json={"error": "boom"})
-    with caplog.at_level("WARNING", logger="onetimesecret"):
+    with caplog.at_level("WARNING", logger="onetimesecret_v2"):
         res = client.secrets.generate()
     assert res.status_code == 200
     assert res["record"]["receipt"]["identifier"] == "rcpt123"
@@ -155,7 +155,7 @@ def test_generate_claim_when_server_withholds_the_value(
     api.get("/receipt/rcpt123").respond(
         200, json={"record": {}, "details": {"secret_value": None, "show_secret": True}}
     )
-    with caplog.at_level("WARNING", logger="onetimesecret"):
+    with caplog.at_level("WARNING", logger="onetimesecret_v2"):
         res = client.secrets.generate()
     assert "secret_value" not in res["details"]
     assert "claim_error" not in res["details"]
@@ -182,7 +182,7 @@ def test_generate_claim_malformed_200_receipt_body_leaks_nothing(
         text=f'{{"details": {{"secret_value": "{leaked}"}}, "record": {{',
         headers={"content-type": "application/json"},
     )
-    with caplog.at_level("WARNING", logger="onetimesecret"):
+    with caplog.at_level("WARNING", logger="onetimesecret_v2"):
         res = client.secrets.generate()
     assert res["record"]["receipt"]["identifier"] == "rcpt123"
     assert "secret_value" not in res["details"]

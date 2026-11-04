@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from onetimesecret import Client, ClientConfig, ConfigurationError
+from onetimesecret_v2 import Client, ClientConfig, ConfigurationError
 
 from .conftest import BASE_URL, CUSTOMER, TOKEN
 

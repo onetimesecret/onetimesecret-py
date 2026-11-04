@@ -7,8 +7,8 @@ import httpx
 import pytest
 import respx
 
-import onetimesecret
-from onetimesecret import Client, Response
+import onetimesecret_v2
+from onetimesecret_v2 import Client, Response
 
 from .conftest import API, BASE_URL, CUSTOMER, TOKEN
 
@@ -32,7 +32,9 @@ def test_default_headers_and_user_agent(api: respx.MockRouter, client: Client) -
     client.status()
     headers = route.calls.last.request.headers
     assert headers["accept"] == "application/json"
-    assert headers["user-agent"].startswith(f"onetime-secret-python/{onetimesecret.__version__}")
+    assert headers["user-agent"].startswith(
+        f"onetimesecret-v2-python/{onetimesecret_v2.__version__}"
+    )
 
 
 def test_custom_user_agent_and_extra_headers(api: respx.MockRouter) -> None:

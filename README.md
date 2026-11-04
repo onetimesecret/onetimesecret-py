@@ -3,10 +3,13 @@
 The official Python client for the [Onetime Secret](https://onetimesecret.com)
 API. Share sensitive information through a link that can only be viewed once.
 
-The package on PyPI is **`onetime-secret`**; the import name is
-**`onetimesecret`**. This repository, **`onetimesecret-py`**, is the Python SDK
+The package on PyPI is **`onetimesecret-v2`**; the import name is
+**`onetimesecret_v2`**. This repository, **`onetimesecret-py`**, is the Python SDK
 in the Onetime Secret SDK family. Each language has its own repository, and the
 repository name is not the package name.
+
+The `v2` suffix identifies the server API generation. The SDK has its own
+release version, independent of the server API version.
 
 - **Sync and async**: `Client` and `AsyncClient` share one API, built on
   [httpx](https://www.python-httpx.org/).
@@ -20,15 +23,15 @@ API reference: [api.onetimesecret.com](https://api.onetimesecret.com).
 ## Installation
 
 ```sh
-pip install onetime-secret
+pip install onetimesecret-v2
 # or
-uv add onetime-secret
+uv add onetimesecret-v2
 ```
 
 ## Quick start
 
 ```python
-from onetimesecret import Client
+from onetimesecret_v2 import Client
 
 client = Client(
     base_url="https://ca.onetimesecret.com",  # your region's API host (required)
@@ -58,7 +61,7 @@ client.status()
 Async:
 
 ```python
-from onetimesecret import AsyncClient
+from onetimesecret_v2 import AsyncClient
 
 async with AsyncClient(base_url="https://eu.onetimesecret.com") as client:
     res = await client.secrets.conceal("no account needed", guest=True)
@@ -98,7 +101,7 @@ data sovereignty, so the client cannot guess one for you.
 
 The apex `onetimesecret.com` is the company website, not an API host, and is
 rejected with a helpful error. The hosts are also available as
-`onetimesecret.REGIONAL_HOSTS`.
+`onetimesecret_v2.REGIONAL_HOSTS`.
 
 ### Configuration
 
@@ -109,7 +112,7 @@ rejected with a helpful error. The hosts are also available as
 | `api_token` | `$ONETIME_API_TOKEN` | API token |
 | `timeout` | `30` | Seconds, per request |
 | `max_retries` | `2` | Retries for idempotent (GET, HEAD) requests only |
-| `user_agent` | `onetime-secret-python/<version> …` | |
+| `user_agent` | `onetimesecret-v2-python/<version> …` | |
 | `default_headers` | `{}` | Sent with every request |
 | `http_client` | none | A preconfigured `httpx.Client` / `httpx.AsyncClient` |
 
@@ -172,7 +175,7 @@ instead of an exception.
 
 ## Responses
 
-Resource methods return an `onetimesecret.Response`, a read-only mapping over
+Resource methods return an `onetimesecret_v2.Response`, a read-only mapping over
 the parsed JSON body with the HTTP metadata alongside:
 
 ```python
@@ -195,7 +198,7 @@ HTTP errors (status >= 400) raise typed exceptions following the API's
 ADR-013 error contract (`{"error": ..., "error_type": ..., ...}`):
 
 ```python
-from onetimesecret import APIError, NotFoundError, RateLimitError
+from onetimesecret_v2 import APIError, NotFoundError, RateLimitError
 
 try:
     client.secrets.reveal("missing")
@@ -234,7 +237,7 @@ never the problem.
 
 ## Logging
 
-The library logs one `DEBUG` line per request to the `onetimesecret` logger.
+The library logs one `DEBUG` line per request to the `onetimesecret_v2` logger.
 Secret values and credentials are never logged.
 
 ## Example

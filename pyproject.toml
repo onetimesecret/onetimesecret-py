@@ -3,9 +3,9 @@ requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [project]
-# Distribution name on PyPI. The import name is `onetimesecret`.
+# Distribution name on PyPI. The import name is `onetimesecret_v2`.
 # (`onetimesecret` on PyPI is held by an unrelated third-party package.)
-name = "onetime-secret"
+name = "onetimesecret-v2"
 dynamic = ["version"]
 description = "Official Python client for the Onetime Secret API"
 readme = "README.md"
@@ -52,11 +52,11 @@ dev = [
 ]
 
 [tool.hatch.version]
-path = "src/onetimesecret/_version.py"
+path = "src/onetimesecret_v2/_version.py"
 
 [tool.hatch.build.targets.sdist]
 include = [
-  "src/onetimesecret",
+  "src/onetimesecret_v2",
   "tests",
   "examples",
   "CHANGELOG.md",
@@ -66,7 +66,7 @@ include = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/onetimesecret"]
+packages = ["src/onetimesecret_v2"]
 
 [tool.uv]
 required-version = ">=0.5"
@@ -125,7 +125,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["onetimesecret"]
+source = ["onetimesecret_v2"]
 branch = true
 
 [tool.coverage.report]

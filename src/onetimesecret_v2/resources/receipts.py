@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 class Receipts:
-    """Receipt operations on a :class:`onetimesecret.Client`."""
+    """Receipt operations on a :class:`onetimesecret_v2.Client`."""
 
     def __init__(self, client: Client) -> None:
         self._client = client
@@ -35,7 +35,7 @@ class Receipts:
 
 
 class AsyncReceipts:
-    """Receipt operations on a :class:`onetimesecret.AsyncClient`."""
+    """Receipt operations on a :class:`onetimesecret_v2.AsyncClient`."""
 
     def __init__(self, client: AsyncClient) -> None:
         self._client = client

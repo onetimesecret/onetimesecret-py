@@ -1,7 +1,7 @@
 """Official Python client for the Onetime Secret API.
 
 Example:
-    >>> from onetimesecret import Client
+    >>> from onetimesecret_v2 import Client
     >>> client = Client(
     ...     base_url="https://ca.onetimesecret.com",
     ...     customer="ur1abc23def",

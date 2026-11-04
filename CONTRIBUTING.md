@@ -46,7 +46,7 @@ links in receipts from `HOST`, which defaults to `localhost:3000`.
 
 ## Guidelines
 
-- Keep the wire contract in `src/onetimesecret/resources/_specs.py`. The sync
+- Keep the wire contract in `src/onetimesecret_v2/resources/_specs.py`. The sync
   and async resource classes only dispatch; they should not know paths or
   payload shapes.
 - Do not normalise API responses. The library returns the server's shape so

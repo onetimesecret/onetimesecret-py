@@ -25,7 +25,7 @@ from collections.abc import Iterator
 
 import pytest
 
-from onetimesecret import APIError, AsyncClient, Client
+from onetimesecret_v2 import APIError, AsyncClient, Client
 
 pytestmark = pytest.mark.live
 

@@ -7,15 +7,15 @@ import httpx
 import pytest
 import respx
 
-from onetimesecret import APIConnectionError, Client, ServerError
-from onetimesecret._base_client import BaseClient
+from onetimesecret_v2 import APIConnectionError, Client, ServerError
+from onetimesecret_v2._base_client import BaseClient
 
 from .conftest import BASE_URL
 
 
 @pytest.fixture(autouse=True)
 def sleep_mock() -> Iterator[mock.MagicMock]:
-    with mock.patch("onetimesecret._client.time.sleep") as sleep:
+    with mock.patch("onetimesecret_v2._client.time.sleep") as sleep:
         yield sleep
 
 
@@ -106,14 +106,14 @@ def test_retry_after_header_is_honoured(
 
 def test_backoff_grows_and_is_capped() -> None:
     client = BaseClient.__new__(BaseClient)
-    with mock.patch("onetimesecret._base_client.random.random", return_value=1.0):
+    with mock.patch("onetimesecret_v2._base_client.random.random", return_value=1.0):
         delays = [client._backoff(n) for n in range(1, 7)]
     assert delays == [0.5, 1.0, 2.0, 4.0, 8.0, 8.0]
 
 
 def test_backoff_has_jitter() -> None:
     client = BaseClient.__new__(BaseClient)
-    with mock.patch("onetimesecret._base_client.random.random", return_value=0.0):
+    with mock.patch("onetimesecret_v2._base_client.random.random", return_value=0.0):
         assert client._backoff(1) == 0.25
 
 

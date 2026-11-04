@@ -70,7 +70,7 @@ jobs:
         run: |
           uv venv /tmp/smoke
           uv pip install --python /tmp/smoke/bin/python dist/*.whl
-          /tmp/smoke/bin/python -c "import onetimesecret; print(onetimesecret.__version__)"
+          /tmp/smoke/bin/python -c "import onetimesecret_v2; print(onetimesecret_v2.__version__)"
 
   live:
     name: Live API tests

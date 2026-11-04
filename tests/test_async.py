@@ -7,7 +7,13 @@ import httpx
 import pytest
 import respx
 
-from onetimesecret import APIConnectionError, AsyncClient, ClaimError, NotFoundError, ServerError
+from onetimesecret_v2 import (
+    APIConnectionError,
+    AsyncClient,
+    ClaimError,
+    NotFoundError,
+    ServerError,
+)
 
 from .conftest import BASE_URL
 
@@ -111,7 +117,7 @@ async def test_get_is_retried(api: respx.MockRouter) -> None:
         httpx.Response(503, json={"error": "busy"}),
         httpx.Response(200, json={"status": "ok"}),
     ]
-    with mock.patch("onetimesecret._client.anyio.sleep") as sleep:
+    with mock.patch("onetimesecret_v2._client.anyio.sleep") as sleep:
         async with AsyncClient(base_url=BASE_URL, max_retries=2) as client:
             assert (await client.status())["status"] == "ok"
     assert route.call_count == 3

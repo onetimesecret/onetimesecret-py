@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from .._response import Response
     from ._specs import DisplayType
 
-log = logging.getLogger("onetimesecret")
+log = logging.getLogger("onetimesecret_v2")
 
 
 def _receipt_key(data: Any) -> str | None:
@@ -60,7 +60,7 @@ def _attach_claim(res: Response, receipt: Response | None, error: ClaimError | N
 
 
 class Secrets:
-    """Secret operations on a :class:`onetimesecret.Client`."""
+    """Secret operations on a :class:`onetimesecret_v2.Client`."""
 
     def __init__(self, client: Client) -> None:
         self._client = client
@@ -126,7 +126,7 @@ class Secrets:
 
         If that read fails the secret still exists and its link is valid, so
         nothing is raised: the generate response is returned without the
-        value, a :class:`~onetimesecret.ClaimError` (status and error type
+        value, a :class:`~onetimesecret_v2.ClaimError` (status and error type
         only, never the body) is attached at ``res["details"]["claim_error"]``
         and a warning is logged. If the server simply declined to disclose
         the value, ``secret_value`` is absent and no error is attached.
@@ -196,7 +196,7 @@ class Secrets:
 
 
 class AsyncSecrets:
-    """Secret operations on a :class:`onetimesecret.AsyncClient`."""
+    """Secret operations on a :class:`onetimesecret_v2.AsyncClient`."""
 
     def __init__(self, client: AsyncClient) -> None:
         self._client = client

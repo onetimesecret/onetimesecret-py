@@ -11,20 +11,18 @@ flow, and creates the GitHub Release. No registry token is stored anywhere.
 | What | Value |
 |---|---|
 | Repository | `onetimesecret/onetimesecret-py` |
-| Distribution (PyPI) | `onetime-secret` |
-| Import name | `onetimesecret` |
-| Version source | `src/onetimesecret/_version.py` (`__version__`) |
+| Distribution (PyPI) | `onetimesecret-v2` |
+| Import name | `onetimesecret_v2` |
+| Version source | `src/onetimesecret_v2/_version.py` (`__version__`) |
 | Workflow | `.github/workflows/release.yml` |
 | GitHub environment | `pypi` |
 
 Repository, distribution and import names do not need to match; the Ruby SDK
 follows the same pattern (`onetimesecret-ruby` / `onetimesecret` / `Onetime`).
 
-`onetimesecret` on PyPI is held by an unrelated third-party package. If it is
-ever transferred to the project under
-[PEP 541](https://peps.python.org/pep-0541/), renaming is a one-line change to
-`[project].name` in `pyproject.toml`, the `url:` in `release.yml`, and a
-release note.
+The `v2` suffix in the distribution and import names identifies the server
+API generation. The SDK's release version is independent: SDK `0.1.0`
+targets server API v2.
 
 ## Initial setup (once per repository)
 
@@ -44,7 +42,7 @@ which reserves the name and binds it to this repository's workflow.
 
    | Field | Value |
    |---|---|
-   | PyPI project name | `onetime-secret` |
+   | PyPI project name | `onetimesecret-v2` |
    | Owner | `onetimesecret` |
    | Repository name | `onetimesecret-py` |
    | Workflow name | `release.yml` |
@@ -100,7 +98,7 @@ short of uploading.
 2. In `CHANGELOG.md`, move the `[Unreleased]` entries under a new
    `## [X.Y.Z] - YYYY-MM-DD` heading and add the comparison link at the
    bottom of the file.
-3. Set `__version__ = "X.Y.Z"` in `src/onetimesecret/_version.py`.
+3. Set `__version__ = "X.Y.Z"` in `src/onetimesecret_v2/_version.py`.
 4. Commit as `Release vX.Y.Z`, open a pull request, merge to `main`.
 5. Tag the merge commit and push the tag:
 
@@ -117,10 +115,10 @@ short of uploading.
    - creates the GitHub Release `vX.Y.Z` with generated notes and the
      distributions attached.
 7. Confirm the new version is visible at
-   <https://pypi.org/project/onetime-secret/> and installs:
+   <https://pypi.org/project/onetimesecret-v2/> and installs:
 
    ```sh
-   uv run --isolated --with onetime-secret==X.Y.Z python -c "import onetimesecret; print(onetimesecret.__version__)"
+   uv run --isolated --with onetimesecret-v2==X.Y.Z python -c "import onetimesecret_v2; print(onetimesecret_v2.__version__)"
    ```
 
 8. Edit the GitHub Release notes if the generated ones need context, and

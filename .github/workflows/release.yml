@@ -37,13 +37,13 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Verify the tag matches onetimesecret.__version__
+      - name: Verify the tag matches onetimesecret_v2.__version__
         run: |
           version="$(uv run --no-sync --no-project python -c \
-            'import runpy; print(runpy.run_path("src/onetimesecret/_version.py")["__version__"])')"
+            'import runpy; print(runpy.run_path("src/onetimesecret_v2/_version.py")["__version__"])')"
           tag="${GITHUB_REF_NAME#v}"
           if [ "$version" != "$tag" ]; then
-            echo "Tag $GITHUB_REF_NAME does not match onetimesecret.__version__ ($version)" >&2
+            echo "Tag $GITHUB_REF_NAME does not match onetimesecret_v2.__version__ ($version)" >&2
             exit 1
           fi
 
@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/project/onetime-secret/
+      url: https://pypi.org/project/onetimesecret-v2/
     permissions:
       id-token: write # mint the OIDC token PyPI verifies
     steps:
